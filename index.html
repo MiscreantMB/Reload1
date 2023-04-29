@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #canvasContainer {
+      border: 5px solid black;
+      overflow: hidden;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvasContainer">
+    <script>
+      let design;
+      let cubes = [];
+      let numCubes = 150;
+      let cubeSize = 30;
+      let lastColorChange = 0;
+
+      function setup() {
+        let canvasSize = min(windowWidth, windowHeight) * 0.8;
+        let canvas = createCanvas(canvasSize, canvasSize, WEBGL);
+        canvas.parent('canvasContainer');
+        background(255, 255, 0);
+
+        drawOrganicDesign();
+
+        for (let i = 0; i < numCubes; i++) {
+          cubes[i] = createCube(canvasSize, cubeSize);
+        }
+      }
+
+      function windowResized() {
+        let canvasSize = min(windowWidth, windowHeight) * 0.8;
+        resizeCanvas(canvasSize, canvasSize);
+      }
+
+      function createCube(canvasSize, cubeSize) {
+        return {
+          x: random(-canvasSize / 2 + cubeSize, canvasSize / 2 - cubeSize),
+          y: random(-canvasSize / 2 + cubeSize, canvasSize / 2 - cubeSize),
+          z: random(-canvasSize / 2 + cubeSize, canvasSize / 2 - cubeSize),
+          rotX: random(-0.02, 0.02),
+          rotY: random(-0.02, 0.02),
+          rotZ: random(-0.02, 0.02),
+          speedX: random(-1, 1),
+          speedY: random(-1, 1),
+          speedZ: random(-1, 1)
+        };
+      }
+
+      function draw() {
+        background(255, 255, 0);
+        push();
+        translate(0, 0);
+
+        for (let i = 0; i < numCubes; i++) {
+          let cube = cubes[i];
+          updateCube(cube, width, height, cubeSize);
+          drawCube(cube);
+        }
+
+        pop();
+
+        if (millis() - lastColorChange > 1000) {
+          drawOrganicDesign();
+          lastColorChange = millis();
+        }
+      }
+
+      function updateCube(cube, width, height, cubeSize) {
+        cube.x += cube.speedX;
+        cube.y += cube.speedY;
+        cube.z += cube.speedZ;
+        wrapCube(cube, width, height, cubeSize);
+      }
+
+       function wrapCube(cube, width, height, cubeSize) {
+        if (cube.x < -width / 2 + cubeSize) cube.x = width / 2 - cubeSize;
+        if (cube.x > width / 2 - cubeSize) cube.x = -width / 2 + cubeSize;
+        if (cube.y < -height / 2 + cubeSize) cube.y = height / 2 - cubeSize;
+        if (cube.y > height / 2 - cubeSize) cube.y = -height / 2 + cubeSize;
+        if (cube.z < -width / 2 + cubeSize) cube.z = width / 2 - cubeSize;
+        if (cube.z > width / 2 - cubeSize) cube.z = -width / 2 + cubeSize;
+      }
+
+      function drawCube(cube) {
+        push();
+        translate(cube.x, cube.y, cube.z);
+        rotateX(frameCount * cube.rotX);
+        rotateY(frameCount * cube.rotY);
+        rotateZ(frameCount * cube.rotZ);
+        texture(design);
+        box(cubeSize);
+        pop();
+      }
+
+      function drawOrganicDesign() {
+        design = createGraphics(200, 200);
+        design.stroke(random(0, 255), random(0, 255), random(0, 255));
+        design.strokeWeight(3);
+        design.noFill();
+        design.background(255, 50);
+
+        for (let i = 0; i < 20; i++) {
+          design.beginShape();
+          let x1 = random(design.width);
+          let y1 = random(design.height);
+          let x2 = random(design.width);
+          let y2 = random(design.height);
+          let x3 = random(design.width);
+          let y3 = random(design.height);
+          design.curveVertex(x1, y1);
+          design.curveVertex(x2, y2);
+          design.curveVertex(x3, y3);
+          design.curveVertex(x1, y1);
+          design.endShape(CLOSE);
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>
